@@ -1,0 +1,45 @@
+database:
+  mongodb:
+    user: Daniel
+    password: "Senhaboba"
+    address: localhost
+    db_name: UsersDB
+    min_pool_size: 5
+  redis:
+    host: localhost
+    db: 0 # redis db is an integer
+    socket_connection_timeout: 60 # seconds
+    port: 6379 # default: 6379
+    unix_socket: /var/run/redis/redis.sock
+logging:
+  level: DEBUG
+  filename: semsinal.log
+application:
+  point:
+    get_limit: 1000000
+    get_default: 10
+  hexagon:
+    size: 0.000561444
+    update_interval: 30 # seconds
+  map_reduce:
+    avgsstr:
+      coll_name: avgSstrMapReduceResults
+      map_file: mapreduce/avgsstr/map.js
+      reduce_file: mapreduce/avgsstr/reduce.js
+    ranking:
+      coll_name: rankingMapReduceResults
+map:
+  tile_size: 256
+  hex_style:
+    sstr_delim: "-9999;-90,-90;-80,-80;0" # limites das intensidades de sinal 
+    colors: "ff0000,ffff00,00ff00" # cores em hex para ruim,medio,bom
+  render_bbox: # bounding-box pra renderizacao dos tiles - lng,lat
+    sw: [-49,-17]
+    ne: [-47,-15]
+  min_zoom: 4
+  max_zoom: 15
+  num_threads: 4
+  queue_size: 102400
+  mapnik_buffer_size: 512
+  telegram_token: 417967452:AAEFkxeS858rjTW5CPaDvgP369cd0A_51do
+  telegram_chatid: 171640399 # Jorge user ID

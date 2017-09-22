@@ -9,6 +9,8 @@ import jwt
 import motor.motor_tornado
 import os
 import scrypt
+import datetime
+from handlers.ConfigHandler import ConfigHandler
 
 class UserHandler(tornado.web.RequestHandler):
 
@@ -20,11 +22,11 @@ class UserHandler(tornado.web.RequestHandler):
 
     @gen.coroutine
     def __get_db_collection(self):
-        client = motor.motor_tornado.MotorClient()
-        client = motor.motor_tornado.MotorClient('localhost', 27017)
-        db = client['UsersDB']
-        return db['users']
-
+        #client = motor.motor_tornado.MotorClient()
+        #client = motor.motor_tornado.MotorClient('localhost', 27017)
+        #db = client['UsersDB']
+        return self.application.mongodb.Users#db['users']
+       
     @gen.coroutine
     def __check_user_and_pw(self, user,pw):
         if user == "" or user == None or pw == "" or pw == None:
@@ -64,34 +66,6 @@ class UserHandler(tornado.web.RequestHandler):
             self.finish()
             return
         else:
-
-            #Código referente a JWT
-
-            options = {
-               'verify_signature': True,
-               'verify_exp': True,         #expiration time
-               'verify_nbf': True,         #not before time
-               'verify_iat': True,         #issued at
-               'verify_aud': True,         #audience
-               'require_exp': False,
-               'require_iat': False,
-               'require_nbf': False
-            }
-
-            encoded = jwt.encode( {'some': 'payload'}, 'secret', algorithm='HS256', headers={'kid': '230498151c214b788dd97f22b85410a5'})
-            logging.debug('Hash = ')
-            logging.debug(encoded)
-            try:
-                payload = jwt.decode(encoded, 'secret', algorithms=['HS256'],options=options) 
-            except jwt.InvalidTokenError:
-                pass  # do something sensible here, e.g. return HTTP 403 status code
-                logging.debug("Invalid TOKEN: ")
-                logging.debug(InvalidTokenError)
-            except jwt.ExpiredSignatureError:
-                pass
-                #Do something    
-
-
             # Verifica se o usuario ja existe
             query_object = {
                 "user": user
@@ -116,7 +90,7 @@ class UserHandler(tornado.web.RequestHandler):
                     "status" : "error",
                     "result" : "user already exists"
                 }
-                self.set_status(403)  # http 200 ok
+                self.set_status(403)  # http 403 forbidden
                 self.write(response)  # sets application/json header
                 self.finish()
                 return
@@ -171,11 +145,31 @@ class LoginHandler(tornado.web.RequestHandler):
         response = {
                 "status": "error",
                 "result": "unauthorized"
-            }
+        }
         logging.debug('unauthorized')
-        self.set_status(401)  # http 200 ok
+        self.set_status(401)  # http 401 unauthorized
         self.write(response)  # sets application/json header
         self.finish()
+
+    @gen.coroutine
+    def __generate_jwt(self,user):
+            payload = {
+                'iss': user,
+                'exp': datetime.datetime.utcnow() + datetime.timedelta(minutes=15),
+                'nbf': datetime.datetime.utcnow(),
+                'iat': datetime.datetime.utcnow()
+            }
+
+            headers = {
+                "alg": "HS256",
+                "typ": "JWT"
+            }
+
+            key = ConfigHandler.jwt_token
+            encoded = jwt.encode(payload, key, headers=headers)
+            return encoded
+
+
 
     @gen.coroutine
     def post(self):
@@ -203,7 +197,8 @@ class LoginHandler(tornado.web.RequestHandler):
 
         query_object = {
             "user":user
-            #"pwdHash": str(pwd_hash.decode('utf8'))
+            #"pwdHash": str(pwd_hash.decode('utf8'))    #Ao inves de usar o hash de novo e comparar, recupera o hash do DB e usa decrypt
+
         }
 
         logging.debug('login user query_object: {0}'.format(query_object))
@@ -231,12 +226,17 @@ class LoginHandler(tornado.web.RequestHandler):
             return
             
         else:
+            jwt = self.__generate_jwt(result["user"])
+            #token = base64.b64encode(jwt).decode('utf-8')
             response = {
                 "id": str(result["_id"]),
-                "user": result["user"]
-            }
+                "user": result["user"],
+                "token": str(jwt)
+           	}
             logging.debug(response)
             self.set_status(200)  # http 200 ok
             self.write(response)  # sets application/json header
             self.finish()
             return
+
+

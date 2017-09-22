@@ -1,9 +1,9 @@
 database:
   mongodb:
-    user: Daniel
-    password: "Senhaboba"
-    address: localhost
-    db_name: UsersDB
+    user: senacon_androidapp
+    password: 6xL8LmnWSVvMEqqnAfpc2WshIlTJPW
+    address: 172.16.24.253
+    db_name: senacon_androidapp
     min_pool_size: 5
   redis:
     host: localhost
@@ -11,6 +11,8 @@ database:
     socket_connection_timeout: 60 # seconds
     port: 6379 # default: 6379
     unix_socket: /var/run/redis/redis.sock
+token:
+  secret: jF50[XF%2LPh"@P$V    
 logging:
   level: DEBUG
   filename: semsinal.log
@@ -42,4 +44,4 @@ map:
   queue_size: 102400
   mapnik_buffer_size: 512
   telegram_token: 417967452:AAEFkxeS858rjTW5CPaDvgP369cd0A_51do
-  telegram_chatid: 171640399 # Jorge user ID
+  telegram_chatid: -1001121938147 # Jorge user ID

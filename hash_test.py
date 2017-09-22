@@ -32,6 +32,18 @@ print ("BASE 64 : ")
 a = base64.b64encode(hashed_pass)
 print("a : ")
 print (a)
+<<<<<<< HEAD
+b = a.decode('utf-8')
+print("b: ")
+print (b)
+c = b.encode('utf-8')
+print("c: ")
+print (c)
+print("Decoded 2:")
+decoded = scrypt.decrypt(c,salt,maxtime=0.5)   
+print(decoded)
+'''
+=======
 
 b = a.decode('utf-8')
 
@@ -46,3 +58,4 @@ print("Decoded 2:")
 decoded = scrypt.decrypt(c,salt,maxtime=0.5)   
 print(decoded)
 '''
+>>>>>>> a37ff0346dca6d5215403077de7096b28dbdfc37
